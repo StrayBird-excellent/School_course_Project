@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Breast Cancer Prediction</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <style>
+    a, a:hover { text-decoration: none; }
+    
+    /* 音乐播放器插件样式 */
+    .music-player-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.8);
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      min-width: 250px;
+      border: 1px solid rgba(26, 188, 156, 0.3);
+    }
+    
+    .music-widget-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .music-widget-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: #ffffff;
+      margin-bottom: 8px;
+      text-align: center;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .music-widget-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .music-widget-btn {
+      background-color: rgba(26, 188, 156, 0.8);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .music-widget-btn:hover {
+      background-color: rgba(26, 188, 156, 1);
+      transform: translateY(-1px);
+    }
+    
+    .music-widget-btn i {
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body class="app-body">
+
+<a id="button" aria-label="Back to top"></a>
+
+{% include "footer.html" %}
+
+<div class="container main-wrap">
+
+  {% include "tumor.html" %}
+
+  <!-- 音乐播放器插件 -->
+  <div class="music-player-widget">
+    <div class="music-widget-content">
+      <div class="music-widget-title" id="current-song">Lata Mangeshkar - Aankhein Khuli</div>
+      <div class="music-widget-controls">
+        <button class="music-widget-btn" id="prev-btn" aria-label="上一首"><i class="fa fa-step-backward"></i></button>
+        <button class="music-widget-btn" id="play-btn" aria-label="播放/暂停"><i class="fa fa-play"></i></button>
+        <button class="music-widget-btn" id="next-btn" aria-label="下一首"><i class="fa fa-step-forward"></i></button>
+      </div>
+    </div>
+    <audio id="audio-player" preload="auto">
+      <source src="/static/music/Lata Mangeshkar - Aankhein Khuli.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+  <section class="info-panel">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <ul class="nav nav-tabs" style="margin-bottom: 0;">
+        <li class="active"><a data-toggle="tab" href="#home" data-i18n="what_is_breast_cancer">What is breast cancer</a></li>
+        <li><a data-toggle="tab" href="#menu1" data-i18n="who_is_affected">Who is affected</a></li>
+        <li><a data-toggle="tab" href="#menu2" data-i18n="common_symptoms">Common symptoms</a></li>
+      </ul>
+      {% include "language_selector.html" %}
+    </div>
+    <div class="tab-content">
+      <div id="home" class="tab-pane fade in active">
+        <h3 data-i18n="what_is_breast_cancer">What is breast cancer</h3>
+        <p data-i18n="breast_cancer_desc">Cancers are usually named for the tissue where they start. Breast cancer begins in breast tissue. Like other cancers, it can grow into nearby tissue and spread to other parts of the body (metastasis).</p>
+      </div>
+      <div id="menu1" class="tab-pane fade">
+        <h3 data-i18n="who_is_affected">Who is affected by breast cancer</h3>
+        <p data-i18n="who_affected_desc">Breast cancer is a leading cause of cancer death in women (after lung cancer). About 1 in 8 women may develop invasive breast cancer in her lifetime. Screening and early detection remain important public health tools.</p>
+        
+        <h4 style="margin-top: 1.5rem; color: var(--accent);" data-i18n="risk_factors">Risk Factors</h4>
+        <ul>
+          <li><strong data-i18n="gender">Gender:</strong> <span data-i18n="gender_desc">Women are much more likely to develop breast cancer than men.</span></li>
+          <li><strong data-i18n="age">Age:</strong> <span data-i18n="age_desc">Risk increases with age, especially after 50.</span></li>
+          <li><strong data-i18n="family_history">Family history:</strong> <span data-i18n="family_history_desc">Having a close relative with breast cancer increases risk.</span></li>
+          <li><strong data-i18n="genetic_mutations">Genetic mutations:</strong> <span data-i18n="genetic_mutations_desc">BRCA1 and BRCA2 gene mutations increase risk.</span></li>
+          <li><strong data-i18n="hormone_therapy">Hormone replacement therapy:</strong> <span data-i18n="hormone_therapy_desc">Long-term use may increase risk.</span></li>
+          <li><strong data-i18n="obesity">Obesity:</strong> <span data-i18n="obesity_desc">Being overweight or obese increases risk, especially after menopause.</span></li>
+          <li><strong data-i18n="alcohol">Alcohol consumption:</strong> <span data-i18n="alcohol_desc">Drinking alcohol increases risk.</span></li>
+        </ul>
+        
+        <h4 style="margin-top: 1.5rem; color: var(--accent);" data-i18n="prevention_tips">Prevention Tips</h4>
+        <ul>
+          <li data-i18n="maintain_weight">Maintain a healthy weight</li>
+          <li data-i18n="exercise">Exercise regularly (at least 150 minutes per week)</li>
+          <li data-i18n="limit_alcohol">Limit alcohol consumption</li>
+          <li data-i18n="breastfeed">Breastfeed if possible</li>
+          <li data-i18n="screening">Get regular screening mammograms</li>
+          <li data-i18n="know_history">Know your family history</li>
+        </ul>
+        
+        <h4 style="margin-top: 1.5rem; color: var(--accent);" data-i18n="statistics_title">Statistics</h4>
+        <p data-i18n="statistics_intro">According to the American Cancer Society:</p>
+        <ul>
+          <li data-i18n="statistics_1_in_8_women">About 1 in 8 women will develop invasive breast cancer during their lifetime</li>
+          <li data-i18n="statistics_1_in_833_men">About 1 in 833 men will develop breast cancer during their lifetime</li>
+          <li data-i18n="statistics_early_detection_benefit">Early detection through screening can significantly improve survival rates</li>
+        </ul>
+      </div>
+      <div id="menu2" class="tab-pane fade">
+        <h3 data-i18n="symptoms_title">Common symptoms of breast cancer</h3>
+        <p data-i18n="symptom_intro">Breast cancer can present with various symptoms. It's important to be aware of any changes in your breasts and consult a healthcare provider if you notice anything unusual.</p>
+        
+        <h4 style="margin-top: 1.5rem; color: var(--accent);" data-i18n="common_symptoms_subtitle">Common Symptoms</h4>
+        <ul>
+          <li data-i18n="symptom_lump_detail">A new lump or mass: Often painless, hard, and has irregular edges, but can also be soft, round, tender, or even painful.</li>
+          <li data-i18n="symptom_size_change">Change in breast size or shape: One breast may become larger or lower than the other.</li>
+          <li data-i18n="symptom_nipple_detail">Nipple changes: Nipple discharge (other than breast milk), nipple retraction (turning inward), or nipple skin that is scaly, crusty, or flaking.</li>
+          <li data-i18n="symptom_skin_detail">Skin changes: Dimpling, puckering, or redness of the breast skin, similar to the skin of an orange (peau d'orange).</li>
+          <li data-i18n="symptom_pain_detail">Breast or nipple pain: While most breast cancers are painless, some can cause pain.</li>
+          <li data-i18n="symptom_swelling">Swelling: Swelling of all or part of a breast (even if no lump is felt).</li>
+          <li data-i18n="symptom_lymph_nodes">Lymph node changes: Swelling of lymph nodes under the arm or around the collarbone.</li>
+        </ul>
+        
+        <h4 style="margin-top: 1.5rem; color: var(--accent);" data-i18n="when_to_see_doctor">When to See a Doctor</h4>
+        <p data-i18n="see_doctor_intro">You should consult a healthcare provider if you notice any of the following:</p>
+        <ul>
+          <li data-i18n="see_doctor_lump">A new lump or mass in your breast or underarm</li>
+          <li data-i18n="see_doctor_change">Any change in the size, shape, or appearance of your breast</li>
+          <li data-i18n="see_doctor_discharge">Any discharge from your nipple</li>
+          <li data-i18n="see_doctor_pain">Persistent breast pain</li>
+          <li data-i18n="see_doctor_skin">Redness, scaliness, or thickening of the breast skin or nipple</li>
+          <li data-i18n="see_doctor_inversion">Nipple retraction or inversion</li>
+        </ul>
+        
+        <h4 style="margin-top: 1.5rem; color: var(--accent);" data-i18n="early_detection">Importance of Early Detection</h4>
+        <p data-i18n="early_detection_desc">Early detection of breast cancer greatly improves treatment outcomes. Regular self-exams, clinical breast exams, and mammograms are important screening tools. The American Cancer Society recommends:</p>
+        <ul>
+          <li data-i18n="early_detection_40_44">Women aged 40-44 should have the choice to start annual mammograms</li>
+          <li data-i18n="early_detection_45_54">Women aged 45-54 should get annual mammograms</li>
+          <li data-i18n="early_detection_55_plus">Women aged 55+ should switch to mammograms every 2 years or continue annual screening</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="predict-panel">
+    <div class="predict-panel__head">
+      <h2 data-i18n="feature_input_title">Feature input</h2>
+      <p class="predict-panel__sub" data-i18n="page_description">Enter the 30 numeric features (mean, standard error, and &ldquo;worst&rdquo; values) from the Wisconsin diagnostic dataset.</p>
+    </div>
+
+    <!-- 自动生成测试数据按钮 -->
+    <div class="text-center" style="margin-bottom: 1.5rem;">
+      <div class="btn-group" role="group" style="gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+        <button id="generate-benign" class="btn btn-generate btn-benign" type="button">
+          <span class="btn-icon"><i class="fa fa-heart-o"></i></span>
+          <span class="btn-text" data-i18n="generate_benign">生成良性数据</span>
+        </button>
+        <button id="generate-malignant" class="btn btn-generate btn-malignant" type="button">
+          <span class="btn-icon"><i class="fa fa-heart"></i></span>
+          <span class="btn-text" data-i18n="generate_malignant">生成恶性数据</span>
+        </button>
+        <button id="generate-random" class="btn btn-generate btn-random" type="button">
+          <span class="btn-icon"><i class="fa fa-random"></i></span>
+          <span class="btn-text" data-i18n="generate_random">随机生成</span>
+        </button>
+      </div>
+      <span id="loading-indicator" class="loading-indicator" style="display: none; margin-left: 1rem;">
+        <i class="fa fa-spinner fa-spin"></i> 生成中...
+      </span>
+    </div>
+
+    <form action="/predict" method="post">
+
+      <h4 class="form-section-title" data-i18n="feature_input_mean">Mean</h4>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value1" data-i18n="radius_mean">Radius mean</label>
+            <input type="text" class="form-control" id="value1" placeholder="radius_mean" name="value1" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value2" data-i18n="texture_mean">Texture mean</label>
+            <input type="text" class="form-control" id="value2" placeholder="texture_mean" name="value2" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value3" data-i18n="perimeter_mean">Perimeter mean</label>
+            <input type="text" class="form-control" id="value3" placeholder="perimeter_mean" name="value3" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value4" data-i18n="area_mean">Area mean</label>
+            <input type="text" class="form-control" id="value4" placeholder="area_mean" name="value4" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value5" data-i18n="smoothness_mean">Smoothness mean</label>
+            <input type="text" class="form-control" id="value5" placeholder="smoothness_mean" name="value5" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value6" data-i18n="compactness_mean">Compactness mean</label>
+            <input type="text" class="form-control" id="value6" placeholder="compactness_mean" name="value6" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value7" data-i18n="concavity_mean">Concavity mean</label>
+            <input type="text" class="form-control" id="value7" placeholder="concavity_mean" name="value7" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value8" data-i18n="concave_points_mean">Concave points mean</label>
+            <input type="text" class="form-control" id="value8" placeholder="concave points_mean" name="value8" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value9" data-i18n="symmetry_mean">Symmetry mean</label>
+            <input type="text" class="form-control" id="value9" placeholder="symmetry_mean" name="value9" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value10" data-i18n="fractal_dimension_mean">Fractal dimension mean</label>
+            <input type="text" class="form-control" id="value10" placeholder="fractal_dimension_mean" name="value10" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+
+      <h4 class="form-section-title" data-i18n="feature_input_se">Standard error</h4>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value11" data-i18n="radius_se">Radius SE</label>
+            <input type="text" class="form-control" id="value11" placeholder="radius_se" name="value11" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value12" data-i18n="texture_se">Texture SE</label>
+            <input type="text" class="form-control" id="value12" placeholder="texture_se" name="value12" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value13" data-i18n="perimeter_se">Perimeter SE</label>
+            <input type="text" class="form-control" id="value13" placeholder="perimeter_se" name="value13" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value14" data-i18n="area_se">Area SE</label>
+            <input type="text" class="form-control" id="value14" placeholder="area_se" name="value14" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value15" data-i18n="smoothness_se">Smoothness SE</label>
+            <input type="text" class="form-control" id="value15" placeholder="smoothness_se" name="value15" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value16" data-i18n="compactness_se">Compactness SE</label>
+            <input type="text" class="form-control" id="value16" placeholder="compactness_se" name="value16" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value17" data-i18n="concavity_se">Concavity SE</label>
+            <input type="text" class="form-control" id="value17" placeholder="concavity_se" name="value17" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value18" data-i18n="concave_points_se">Concave points SE</label>
+            <input type="text" class="form-control" id="value18" placeholder="concave points_se" name="value18" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value19" data-i18n="symmetry_se">Symmetry SE</label>
+            <input type="text" class="form-control" id="value19" placeholder="symmetry_se" name="value19" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value20" data-i18n="fractal_dimension_se">Fractal dimension SE</label>
+            <input type="text" class="form-control" id="value20" placeholder="fractal_dimension_se" name="value20" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+
+      <h4 class="form-section-title" data-i18n="feature_input_worst">Worst</h4>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value21" data-i18n="radius_worst">Radius worst</label>
+            <input type="text" class="form-control" id="value21" placeholder="radius_worst" name="value21" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value22" data-i18n="texture_worst">Texture worst</label>
+            <input type="text" class="form-control" id="value22" placeholder="texture_worst" name="value22" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value23" data-i18n="perimeter_worst">Perimeter worst</label>
+            <input type="text" class="form-control" id="value23" placeholder="perimeter_worst" name="value23" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value24" data-i18n="area_worst">Area worst</label>
+            <input type="text" class="form-control" id="value24" placeholder="area_worst" name="value24" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value25" data-i18n="smoothness_worst">Smoothness worst</label>
+            <input type="text" class="form-control" id="value25" placeholder="smoothness_worst" name="value25" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value26" data-i18n="compactness_worst">Compactness worst</label>
+            <input type="text" class="form-control" id="value26" placeholder="compactness_worst" name="value26" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value27" data-i18n="concavity_worst">Concavity worst</label>
+            <input type="text" class="form-control" id="value27" placeholder="concavity_worst" name="value27" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value28" data-i18n="concave_points_worst">Concave points worst</label>
+            <input type="text" class="form-control" id="value28" placeholder="concave points_worst" name="value28" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div class="row form-row-tight">
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value29" data-i18n="symmetry_worst">Symmetry worst</label>
+            <input type="text" class="form-control" id="value29" placeholder="symmetry_worst" name="value29" required inputmode="decimal">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group fg-modern">
+            <label class="control-label" for="value30" data-i18n="fractal_dimension_worst">Fractal dimension worst</label>
+            <input type="text" class="form-control" id="value30" placeholder="fractal_dimension_worst" name="value30" required inputmode="decimal">
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center" style="margin-top: 1.5rem;">
+        <button class="btn btn-predict" type="submit" data-i18n="run_prediction">Run prediction</button>
+      </div>
+    </form>
+  </section>
+
+  {% include "copyrights.html" %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 初始化多语言（包含语言切换事件绑定）
+    initLanguage();
+    
+    // 清空所有表单输入框，防止浏览器自动填充旧数据导致预测结果固定
+    console.log('=== 清空所有输入框 ===');
+    for (var i = 1; i <= 30; i++) {
+      var input = document.getElementById('value' + i);
+      if (input) {
+        input.value = '';
+        console.log('已清空 value' + i);
+      }
+    }
+    console.log('=== 输入框清空完成 ===');
+  });
+</script>
+
+<script>
+  (function () {
+    var btn = document.getElementById('button');
+    if (!btn) return;
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > 300) {
+        btn.classList.add('show');
+      } else {
+        btn.classList.remove('show');
+      }
+    });
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+</script>
+
+<script>
+  // 自动生成测试数据功能
+  document.addEventListener('DOMContentLoaded', function() {
+    var loadingIndicator = document.getElementById('loading-indicator');
+    
+    if (!loadingIndicator) {
+      console.error('加载指示器未找到');
+      return;
+    }
+    
+    // Wisconsin诊断数据集各字段的医学合理范围（整个数据集）
+    var fieldRangesFull = {
+      // Mean values
+      value1: { min: 6.981, max: 28.11 },    // radius_mean
+      value2: { min: 9.71, max: 39.28 },     // texture_mean
+      value3: { min: 43.79, max: 188.5 },    // perimeter_mean
+      value4: { min: 143.5, max: 2501 },     // area_mean
+      value5: { min: 0.05263, max: 0.1634 }, // smoothness_mean
+      value6: { min: 0.01938, max: 0.3454 }, // compactness_mean
+      value7: { min: 0, max: 0.4268 },       // concavity_mean
+      value8: { min: 0, max: 0.2012 },       // concave_points_mean
+      value9: { min: 0.106, max: 0.304 },    // symmetry_mean
+      value10: { min: 0.04996, max: 0.09744 },// fractal_dimension_mean
+      // SE values
+      value11: { min: 0.1115, max: 2.873 },  // radius_se
+      value12: { min: 0.3602, max: 4.885 },  // texture_se
+      value13: { min: 0.757, max: 21.98 },   // perimeter_se
+      value14: { min: 6.802, max: 542.2 },   // area_se
+      value15: { min: 0.001713, max: 0.03113 },// smoothness_se
+      value16: { min: 0.002252, max: 0.1354 },// compactness_se
+      value17: { min: 0, max: 0.396 },        // concavity_se
+      value18: { min: 0, max: 0.05391 },     // concave_points_se
+      value19: { min: 0.007882, max: 0.07895 },// symmetry_se
+      value20: { min: 0.0008948, max: 0.02984 },// fractal_dimension_se
+      // Worst values
+      value21: { min: 7.93, max: 36.04 },    // radius_worst
+      value22: { min: 12.02, max: 49.54 },   // texture_worst
+      value23: { min: 50.41, max: 251.2 },   // perimeter_worst
+      value24: { min: 185.2, max: 4254 },    // area_worst
+      value25: { min: 0.07117, max: 0.2226 },// smoothness_worst
+      value26: { min: 0.02729, max: 1.058 }, // compactness_worst
+      value27: { min: 0, max: 1.252 },       // concavity_worst
+      value28: { min: 0, max: 0.291 },       // concave_points_worst
+      value29: { min: 0.1565, max: 0.6638 }, // symmetry_worst
+      value30: { min: 0.05504, max: 0.2075 } // fractal_dimension_worst
+    };
+    
+    // 良性样本的特征范围（根据Wisconsin数据集统计）
+    var fieldRangesBenign = {
+      value1: { min: 6.981, max: 15.0 },     // radius_mean - 良性通常较小
+      value2: { min: 9.71, max: 25.0 },      // texture_mean
+      value3: { min: 43.79, max: 100.0 },    // perimeter_mean
+      value4: { min: 143.5, max: 600 },      // area_mean
+      value5: { min: 0.05263, max: 0.12 },   // smoothness_mean
+      value6: { min: 0.01938, max: 0.1 },    // compactness_mean - 良性较小
+      value7: { min: 0, max: 0.1 },          // concavity_mean - 良性较小
+      value8: { min: 0, max: 0.05 },         // concave_points_mean - 良性较小
+      value9: { min: 0.106, max: 0.2 },      // symmetry_mean
+      value10: { min: 0.04996, max: 0.08 },  // fractal_dimension_mean
+      value11: { min: 0.1115, max: 1.0 },    // radius_se
+      value12: { min: 0.3602, max: 2.5 },    // texture_se
+      value13: { min: 0.757, max: 8.0 },     // perimeter_se
+      value14: { min: 6.802, max: 100 },     // area_se
+      value15: { min: 0.001713, max: 0.015 },// smoothness_se
+      value16: { min: 0.002252, max: 0.05 }, // compactness_se
+      value17: { min: 0, max: 0.1 },         // concavity_se
+      value18: { min: 0, max: 0.02 },        // concave_points_se
+      value19: { min: 0.007882, max: 0.03 }, // symmetry_se
+      value20: { min: 0.0008948, max: 0.015 },// fractal_dimension_se
+      value21: { min: 7.93, max: 17.0 },     // radius_worst
+      value22: { min: 12.02, max: 28.0 },    // texture_worst
+      value23: { min: 50.41, max: 110.0 },   // perimeter_worst
+      value24: { min: 185.2, max: 800 },     // area_worst
+      value25: { min: 0.07117, max: 0.15 },  // smoothness_worst
+      value26: { min: 0.02729, max: 0.2 },   // compactness_worst - 良性较小
+      value27: { min: 0, max: 0.2 },         // concavity_worst - 良性较小
+      value28: { min: 0, max: 0.08 },        // concave_points_worst - 良性较小
+      value29: { min: 0.1565, max: 0.3 },    // symmetry_worst
+      value30: { min: 0.05504, max: 0.1 }    // fractal_dimension_worst
+    };
+    
+    // 恶性样本的特征范围（根据Wisconsin数据集统计）
+    var fieldRangesMalignant = {
+      value1: { min: 15.0, max: 28.11 },     // radius_mean - 恶性通常较大
+      value2: { min: 20.0, max: 39.28 },     // texture_mean
+      value3: { min: 100.0, max: 188.5 },    // perimeter_mean
+      value4: { min: 600, max: 2501 },       // area_mean
+      value5: { min: 0.1, max: 0.1634 },     // smoothness_mean
+      value6: { min: 0.1, max: 0.3454 },     // compactness_mean - 恶性较大
+      value7: { min: 0.1, max: 0.4268 },     // concavity_mean - 恶性较大
+      value8: { min: 0.05, max: 0.2012 },    // concave_points_mean - 恶性较大
+      value9: { min: 0.18, max: 0.304 },     // symmetry_mean
+      value10: { min: 0.06, max: 0.09744 },  // fractal_dimension_mean
+      value11: { min: 0.5, max: 2.873 },     // radius_se
+      value12: { min: 1.5, max: 4.885 },     // texture_se
+      value13: { min: 5.0, max: 21.98 },     // perimeter_se
+      value14: { min: 50, max: 542.2 },      // area_se
+      value15: { min: 0.01, max: 0.03113 },  // smoothness_se
+      value16: { min: 0.03, max: 0.1354 },   // compactness_se
+      value17: { min: 0.05, max: 0.396 },    // concavity_se
+      value18: { min: 0.01, max: 0.05391 },  // concave_points_se
+      value19: { min: 0.02, max: 0.07895 },  // symmetry_se
+      value20: { min: 0.01, max: 0.02984 },  // fractal_dimension_se
+      value21: { min: 17.0, max: 36.04 },    // radius_worst
+      value22: { min: 25.0, max: 49.54 },    // texture_worst
+      value23: { min: 110.0, max: 251.2 },   // perimeter_worst
+      value24: { min: 800, max: 4254 },      // area_worst
+      value25: { min: 0.12, max: 0.2226 },   // smoothness_worst
+      value26: { min: 0.2, max: 1.058 },     // compactness_worst - 恶性较大
+      value27: { min: 0.2, max: 1.252 },     // concavity_worst - 恶性较大
+      value28: { min: 0.08, max: 0.291 },    // concave_points_worst - 恶性较大
+      value29: { min: 0.25, max: 0.6638 },   // symmetry_worst
+      value30: { min: 0.08, max: 0.2075 }    // fractal_dimension_worst
+    };
+    
+    // 获取当前使用的范围配置
+    function getFieldRanges(mode) {
+      switch(mode) {
+        case 'benign':
+          return fieldRangesBenign;
+        case 'malignant':
+          return fieldRangesMalignant;
+        default:
+          return fieldRangesFull;
+      }
+    }
+    
+    // 生成指定范围内的随机数
+    function randomInRange(min, max, decimals) {
+      var random = Math.random() * (max - min) + min;
+      return random.toFixed(decimals);
+    }
+    
+    // 验证数据是否在有效范围内
+    function validateData(fieldId, value, ranges) {
+      var range = ranges[fieldId];
+      if (!range) return true;
+      var numValue = parseFloat(value);
+      return numValue >= range.min && numValue <= range.max;
+    }
+    
+    // 生成并填充测试数据
+    function generateAndFillTestData(mode) {
+      console.log('=== generateAndFillTestData 被调用 ===');
+      console.log('模式:', mode);
+      
+      // 获取对应的范围配置
+      var fieldRanges = getFieldRanges(mode);
+      console.log('使用的字段范围:', fieldRanges);
+      
+      // 显示加载状态
+      disableButtons(true);
+      loadingIndicator.style.display = 'inline-block';
+      console.log('加载状态已显示');
+      
+      // 模拟生成延迟，提供更好的用户体验
+      setTimeout(function() {
+        console.log('开始生成数据...');
+        try {
+          var success = true;
+          var errors = [];
+          
+          // 为每个字段生成数据
+          for (var i = 1; i <= 30; i++) {
+            var fieldId = 'value' + i;
+            var inputElement = document.getElementById(fieldId);
+            
+            if (!inputElement) {
+              errors.push('字段 ' + fieldId + ' 未找到');
+              console.warn('字段 ' + fieldId + ' 未找到');
+              continue;
+            }
+            
+            var range = fieldRanges[fieldId];
+            if (!range) {
+              errors.push('字段 ' + fieldId + ' 的范围配置不存在');
+              console.warn('字段 ' + fieldId + ' 的范围配置不存在');
+              continue;
+            }
+            
+            // 根据字段类型决定小数位数
+            var decimals = i >= 5 && i <= 10 ? 4 : 
+                          i >= 11 && i <= 20 ? 4 : 
+                          i >= 21 && i <= 24 ? 1 : 
+                          i >= 25 && i <= 30 ? 4 : 1;
+            
+            var generatedValue = randomInRange(range.min, range.max, decimals);
+            console.log('字段 ' + fieldId + ' 生成值:', generatedValue);
+            
+            // 验证生成的数据
+            if (!validateData(fieldId, generatedValue, fieldRanges)) {
+              errors.push('字段 ' + fieldId + ' 生成的数据超出有效范围');
+              success = false;
+              continue;
+            }
+            
+            // 填充数据
+            inputElement.value = generatedValue;
+            // 添加视觉反馈
+            inputElement.style.borderColor = mode === 'benign' ? '#1abc9c' : mode === 'malignant' ? '#e74c3c' : '#3498db';
+            setTimeout(function(el) {
+              el.style.borderColor = '';
+            }, 1000, inputElement);
+          }
+          
+          // 隐藏加载状态
+          loadingIndicator.style.display = 'none';
+          disableButtons(false);
+          console.log('加载状态已隐藏');
+          
+          if (success) {
+            // 显示成功提示
+            var modeText = mode === 'benign' ? '良性' : mode === 'malignant' ? '恶性' : '随机';
+            showNotification(modeText + '测试数据已成功生成并填充到表单中', 'success');
+            console.log('数据生成成功:', modeText);
+          } else {
+            // 显示错误提示
+            showNotification('数据生成过程中出现错误: ' + errors.join(', '), 'error');
+            console.error('数据生成错误:', errors);
+          }
+          
+        } catch (error) {
+          // 隐藏加载状态
+          loadingIndicator.style.display = 'none';
+          disableButtons(false);
+          
+          // 显示异常提示
+          showNotification('数据生成失败: ' + error.message, 'error');
+          console.error('数据生成异常:', error);
+        }
+      }, 800); // 800ms延迟，模拟处理时间
+    }
+    
+    // 禁用/启用按钮
+    function disableButtons(disabled) {
+      var buttons = document.querySelectorAll('.btn-generate');
+      buttons.forEach(function(btn) {
+        btn.disabled = disabled;
+        btn.style.opacity = disabled ? '0.6' : '1';
+      });
+    }
+    
+    // 显示通知消息
+    function showNotification(message, type) {
+      // 创建通知元素
+      var notification = document.createElement('div');
+      notification.className = 'notification notification--' + type;
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+        background: ${type === 'success' ? '#1abc9c' : '#e74c3c'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      `;
+      
+      // 添加动画样式
+      var style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        @keyframes slideOut {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(notification);
+      
+      // 3秒后自动消失
+      setTimeout(function() {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(function() {
+          notification.remove();
+        }, 300);
+      }, 3000);
+    }
+    
+    // 绑定按钮点击事件
+    var benignBtn = document.getElementById('generate-benign');
+    var malignantBtn = document.getElementById('generate-malignant');
+    var randomBtn = document.getElementById('generate-random');
+    
+    console.log('=== 按钮元素查找结果 ===');
+    console.log('benignBtn:', benignBtn);
+    console.log('malignantBtn:', malignantBtn);
+    console.log('randomBtn:', randomBtn);
+    
+    if (benignBtn) {
+      benignBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('生成良性数据按钮被点击');
+        generateAndFillTestData('benign');
+      });
+    } else {
+      console.error('生成良性数据按钮未找到');
+    }
+    
+    if (malignantBtn) {
+      malignantBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('生成恶性数据按钮被点击');
+        generateAndFillTestData('malignant');
+      });
+    } else {
+      console.error('生成恶性数据按钮未找到');
+    }
+    
+    if (randomBtn) {
+      randomBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('随机生成按钮被点击');
+        generateAndFillTestData('random');
+      });
+    } else {
+      console.error('随机生成按钮未找到');
+    }
+    
+    console.log('=== 自动生成测试数据功能初始化完成 ===');
+  });
+</script>
+
+<script>
+  // 纯JavaScript实现标签页功能，不依赖jQuery
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== 标签页初始化开始 ===');
+    
+    // 获取标签页元素
+    var tabContainer = document.querySelector('.nav-tabs');
+    var tabLinks = document.querySelectorAll('.nav-tabs a');
+    var tabPanes = document.querySelectorAll('.tab-content .tab-pane');
+    
+    console.log('标签页容器:', tabContainer ? '找到' : '未找到');
+    console.log('标签页链接数量:', tabLinks.length);
+    console.log('标签内容面板数量:', tabPanes.length);
+    
+    // 为每个标签添加点击事件
+    tabLinks.forEach(function(tabLink, index) {
+      console.log('标签页', index, '目标:', tabLink.getAttribute('href'));
+      
+      tabLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('标签页点击:', tabLink.getAttribute('href'));
+        
+        // 移除所有标签的active类
+        var tabItems = document.querySelectorAll('.nav-tabs li');
+        tabItems.forEach(function(item) {
+          item.classList.remove('active');
+        });
+        
+        // 移除所有内容面板的active类
+        tabPanes.forEach(function(pane) {
+          pane.classList.remove('active', 'in');
+        });
+        
+        // 添加active类到当前标签
+        var parentLi = tabLink.closest('li');
+        if (parentLi) {
+          parentLi.classList.add('active');
+        }
+        
+        // 激活对应的内容面板
+        var targetId = tabLink.getAttribute('href');
+        var targetPane = document.querySelector(targetId);
+        if (targetPane) {
+          targetPane.classList.add('active', 'in');
+          console.log('标签页激活:', targetId);
+        } else {
+          console.error('目标面板未找到:', targetId);
+        }
+      });
+    });
+    
+    // 检查标签内容
+    tabPanes.forEach(function(pane, index) {
+      console.log('面板', index, 'ID:', pane.id, '内容长度:', pane.innerHTML.length);
+    });
+    
+    console.log('=== 标签页初始化完成 ===');
+  });
+</script>
+
+  <!-- 音乐播放器脚本 -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 音乐播放器元素
+    var audio = document.getElementById('audio-player');
+    var playBtn = document.getElementById('play-btn');
+    var prevBtn = document.getElementById('prev-btn');
+    var nextBtn = document.getElementById('next-btn');
+    var currentSongEl = document.getElementById('current-song');
+    
+    // 确保元素存在
+    if (!audio || !playBtn || !prevBtn || !nextBtn || !currentSongEl) {
+      console.error('音乐播放器元素未找到');
+      return;
+    }
+    
+    console.log('音乐播放器初始化');
+    
+    // 歌单
+    var playlist = [
+      {
+        title: 'Lata Mangeshkar - Aankhein Khuli',
+        src: '/static/music/Lata Mangeshkar - Aankhein Khuli.mp3'
+      }
+      // 可以添加更多歌曲
+    ];
+    
+    var currentSongIndex = 0;
+    
+    // 加载歌曲
+    function loadSong(songIndex) {
+      console.log('加载歌曲:', songIndex);
+      var song = playlist[songIndex];
+      audio.src = song.src;
+      currentSongEl.textContent = song.title;
+      audio.load();
+      playSong();
+    }
+    
+    // 播放歌曲
+    function playSong() {
+      console.log('播放歌曲');
+      audio.play().catch(function(error) {
+        console.error('播放失败:', error);
+      });
+      playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+    }
+    
+    // 暂停歌曲
+    function pauseSong() {
+      console.log('暂停歌曲');
+      audio.pause();
+      playBtn.innerHTML = '<i class="fa fa-play"></i>';
+    }
+    
+    // 播放/暂停切换
+    playBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('播放/暂停按钮点击');
+      console.log('当前状态:', audio.paused ? '已暂停' : '正在播放');
+      if (audio.paused) {
+        playSong();
+      } else {
+        pauseSong();
+      }
+    });
+    
+    // 上一首
+    prevBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('上一首按钮点击');
+      currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+      loadSong(currentSongIndex);
+    });
+    
+    // 下一首
+    nextBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('下一首按钮点击');
+      currentSongIndex = (currentSongIndex + 1) % playlist.length;
+      loadSong(currentSongIndex);
+    });
+    
+    // 歌曲结束时自动播放下一首
+    audio.addEventListener('ended', function() {
+      console.log('歌曲结束');
+      currentSongIndex = (currentSongIndex + 1) % playlist.length;
+      loadSong(currentSongIndex);
+    });
+    
+    // 页面加载完成后自动播放
+    loadSong(currentSongIndex);
+  });
+  </script>
+{% set assistant_context = {'page': 'home'} %}
+{% include 'assistant_widget.html' %}
+</body>
+</html>

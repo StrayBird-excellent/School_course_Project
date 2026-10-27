@@ -1,0 +1,38 @@
+{% set assistant_context = assistant_context|default({}) %}
+<script type="application/json" id="bc-assistant-context">{{ assistant_context|tojson }}</script>
+
+<div
+  id="bc-assistant"
+  class="bc-assistant"
+  style="position: fixed; bottom: 2rem; left: 2rem; z-index: 1000;"
+  data-chat-url="{{ url_for('assistant_chat') }}"
+  aria-label="AI语言助手"
+>
+  <button type="button" id="bc-assistant-toggle" class="bc-assistant__fab" aria-expanded="false" aria-controls="bc-assistant-panel">
+    <span class="bc-assistant__fab-glow" aria-hidden="true"></span>
+    <span class="bc-assistant__fab-inner">
+      <i class="fa fa-comments" aria-hidden="true"></i>
+      <span class="bc-assistant__fab-text">AI助手</span>
+    </span>
+  </button>
+
+  <div id="bc-assistant-panel" class="bc-assistant__panel" role="dialog" aria-modal="false" aria-labelledby="bc-assistant-title" hidden style="position: absolute; bottom: 100%; left: 0; margin-bottom: 1rem;">
+    <div class="bc-assistant__panel-head">
+      <div>
+        <h2 id="bc-assistant-title" class="bc-assistant__title">AI解读助手</h2>
+        <p class="bc-assistant__subtitle" id="bc-assistant-model-info">正在连接...</p>
+        <p class="bc-assistant__subtitle">解释特征含义、预测结果与注意事项（演示用途，非诊疗意见）</p>
+      </div>
+      <button type="button" id="bc-assistant-close" class="bc-assistant__icon-btn" aria-label="关闭">&times;</button>
+    </div>
+    <div id="bc-assistant-messages" class="bc-assistant__messages" tabindex="0"></div>
+    <form id="bc-assistant-form" class="bc-assistant__form">
+      <label class="sr-only" for="bc-assistant-input">输入消息</label>
+      <textarea id="bc-assistant-input" class="bc-assistant__input" rows="2" placeholder="例如：这些特征分别代表什么？预测结果怎么理解？" autocomplete="off"></textarea>
+      <button type="submit" class="bc-assistant__send" id="bc-assistant-send">发送</button>
+    </form>
+    <p id="bc-assistant-status" class="bc-assistant__status" role="status"></p>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/assistant.js') }}" defer></script>

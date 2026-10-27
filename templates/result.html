@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Prediction Result · Breast Cancer Prediction</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <style>
+    /* 用户信息样式 */
+    .user-info {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-card);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+    }
+    
+    .user-info__text {
+      font-size: 0.9rem;
+    }
+    
+    .user-info__name {
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .user-info__phone {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    .user-info__logout {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 8px;
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .user-info__logout:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* 语言选择器样式覆盖 */
+    .user-info .language-selector-wrapper {
+      position: relative;
+      z-index: 1000;
+    }
+
+    .user-info .language-dropdown {
+      z-index: 1001;
+    }
+
+    /* 预测结果增强样式 */
+    .result-details {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .result-details h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    
+    .probability-chart {
+      height: 200px;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+    
+    .probability-bar {
+      height: 20px;
+      background: var(--bg-elevated);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+    
+    .probability-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1s ease;
+    }
+    
+    .probability-fill.benign {
+      background: linear-gradient(90deg, var(--accent) 0%, #2eb8a8 100%);
+    }
+    
+    .probability-fill.malignant {
+      background: linear-gradient(90deg, var(--rose) 0%, #e55c8a 100%);
+    }
+    
+    .probability-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    
+    .medical-explanation {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(61, 214, 195, 0.05);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+    
+    .medical-explanation h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+    
+    /* 关怀消息部分样式 */
+    .care-section {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background: linear-gradient(145deg, rgba(255, 182, 193, 0.1) 0%, rgba(255, 105, 180, 0.05) 100%);
+      border: 1px solid rgba(255, 182, 193, 0.3);
+      border-radius: var(--radius-lg);
+      text-align: center;
+    }
+    
+    .care-section h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #e84a8a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .care-section h3::before,
+    .care-section h3::after {
+      content: '❤️';
+      font-size: 1rem;
+    }
+    
+    .care-section__subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    
+    .care-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: #e84a8a;
+      font-size: 1rem;
+      padding: 2rem;
+    }
+    
+    .care-loading i {
+      font-size: 1.5rem;
+      color: #e84a8a;
+    }
+    
+    .care-error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: var(--rose);
+      padding: 1rem;
+      background: rgba(244, 63, 94, 0.1);
+      border-radius: var(--radius-md);
+    }
+    
+    .care-messages-container {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .care-message {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 182, 193, 0.2);
+      animation: fadeInUp 0.5s ease-out forwards;
+      opacity: 0;
+    }
+    
+    .care-message__icon {
+      font-size: 1.25rem;
+      color: #e84a8a;
+      flex-shrink: 0;
+      margin-top: 0.25rem;
+    }
+    
+    .care-message__text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text);
+      margin: 0;
+      font-style: italic;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* 报告功能样式 */
+    .report-section {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .report-section h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    
+    .report-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .btn-report {
+      padding: 0.75rem 1.5rem;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: #041210 !important;
+      background: linear-gradient(145deg, var(--accent) 0%, #2eb8a8 100%) !important;
+      border: none !important;
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 32px var(--accent-glow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    
+    .btn-report:hover,
+    .btn-report:focus {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 40px var(--accent-glow);
+      color: #041210 !important;
+    }
+    
+    @media (max-width: 768px) {
+      .user-info {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 1rem;
+        justify-content: center;
+      }
+      
+      .report-buttons {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body class="app-body">
+
+<div class="container main-wrap">
+
+  {% include "footer.html" %}
+
+  <!-- 用户信息展示 -->
+  {% if session.user_name %}
+  <div class="user-info">
+    <div class="user-info__text">
+      <div class="user-info__name">{{ session.user_name }}</div>
+      <div class="user-info__phone">{{ session.get('user_phone', '') }}</div>
+    </div>
+    <a href="/logout" class="user-info__logout">
+      <i class="fa fa-sign-out"></i> <span data-i18n="logout">登出</span>
+    </a>
+    {% include "language_selector.html" %}
+  </div>
+  {% endif %}
+
+  <section class="result-hero {% if output == 'Malignant' %}result--malign{% else %}result--benign{% endif %}">
+    <h1 data-i18n="prediction">Prediction</h1>
+    <p class="result-meta"><span data-i18n="probability_benign">Benign</span> / <span data-i18n="probability_malignant">Malignant</span>: <strong>{{ (prob_benign * 100)|round(2) }}%</strong> / <strong>{{ (prob_malignant * 100)|round(2) }}%</strong></p>
+    <p class="result-meta" data-i18n="model_accuracy">Reported model accuracy (hold-out): <strong>{{ (accuracy * 100)|round(2) }}%</strong></p>
+    <p class="result-meta" data-i18n="inference_time">Inference time: <strong>{{ time|round(4) }} s</strong></p>
+    <p class="result-meta" style="margin-top:1.25rem;">
+      <a href="/" data-i18n="back_to_form">← Back to input form</a>
+    </p>
+  </section>
+
+  <!-- 详细预测结果 -->
+  <section class="result-details">
+    <h3 data-i18n="prediction_details">Prediction Details</h3>
+    
+    <!-- 概率可视化 -->
+    <div class="probability-section">
+      <h4 style="margin-bottom: 1rem; color: var(--accent);" data-i18n="probability_distribution">Probability Distribution</h4>
+      
+      <div class="probability-label">
+        <span data-i18n="probability_benign">Benign</span>
+        <span>{{ (prob_benign * 100)|round(2) }}%</span>
+      </div>
+      <div class="probability-bar">
+        <div class="probability-fill benign" style="width: {{ '%d' % (prob_benign * 100) }}%"></div>
+      </div>
+      
+      <div class="probability-label">
+        <span data-i18n="probability_malignant">Malignant</span>
+        <span>{{ (prob_malignant * 100)|round(2) }}%</span>
+      </div>
+      <div class="probability-bar">
+        <div class="probability-fill malignant" style="width: {{ '%d' % (prob_malignant * 100) }}%"></div>
+      </div>
+    </div>
+    
+    <!-- 医学解释 -->
+    <div class="medical-explanation">
+      <h4 data-i18n="medical_interpretation">Medical Interpretation</h4>
+      {% if output == 'Benign' %}
+      <p data-i18n="benign_interpretation">The model predicts that the tumor is benign (non-cancerous). This means the cells are not growing in an uncontrolled way and are unlikely to spread to other parts of the body. However, it's important to follow up with your healthcare provider for regular monitoring.</p>
+      {% else %}
+      <p data-i18n="malignant_interpretation">The model predicts that the tumor is malignant (cancerous). This means the cells are growing in an uncontrolled way and may have the potential to spread to other parts of the body. It's crucial to consult with a healthcare provider immediately for further evaluation and treatment options.</p>
+      {% endif %}
+      <p><strong data-i18n="important_note">Important Note:</strong> <span data-i18n="medical_disclaimer">This prediction is based on a machine learning model and should not be considered a definitive medical diagnosis. Always consult with a qualified healthcare professional for proper medical advice.</span></p>
+    </div>
+    
+    <!-- 关怀消息部分 -->
+    <section id="care-messages-section" class="care-section">
+      <h3 data-i18n="care_inspiration">Care & Inspiration</h3>
+      <p class="care-section__subtitle" data-i18n="care_subtitle">Words of hope and encouragement for your journey</p>
+      
+      <div id="care-loading" class="care-loading">
+        <i class="fa fa-heart fa-pulse"></i>
+        <span>Generating care messages...</span>
+      </div>
+      
+      <div id="care-error" class="care-error" style="display: none;">
+        <i class="fa fa-exclamation-circle"></i>
+        <span></span>
+      </div>
+      
+      <div id="care-messages-container" class="care-messages-container">
+        <!-- 关怀消息将通过JavaScript动态加载 -->
+      </div>
+    </section>
+
+  </section>
+
+  <!-- 报告功能 -->
+  <section class="report-section">
+    <h3>Generate Report</h3>
+    <p>Create a detailed report of your prediction results for reference or to share with your healthcare provider.</p>
+    <div class="report-buttons">
+      <a href="#" class="btn btn-report">
+        <i class="fa fa-file-text-o"></i> Download Report (HTML)
+      </a>
+      <a href="#" class="btn btn-report">
+        <i class="fa fa-print"></i> Print Report
+      </a>
+      <a href="#" class="btn btn-report">
+        <i class="fa fa-envelope"></i> Email Report
+      </a>
+    </div>
+  </section>
+
+  {% include "tumor.html" %}
+
+  {% include "copyrights.html" %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 初始化多语言（包含语言选择器事件绑定）
+    initLanguage();
+  });
+</script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+  // 概率条动画
+  document.addEventListener('DOMContentLoaded', function() {
+    const fillBars = document.querySelectorAll('.probability-fill');
+    fillBars.forEach(bar => {
+      const width = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => {
+        bar.style.width = width;
+      }, 100);
+    });
+  });
+</script>
+
+<script>
+  // 报告生成功能
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== 报告功能初始化 ===');
+    
+    // 获取报告数据 - 使用JSON序列化确保JavaScript安全
+    const reportData = JSON.parse('{{ report_data | tojson | safe }}');
+    
+    console.log('报告数据:', reportData);
+    
+    // 下载PDF报告
+    document.querySelector('a[href="#"].btn-report:nth-child(1)').addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('下载PDF报告');
+      
+      // 模拟PDF生成和下载
+      generateAndDownloadPDF(reportData);
+    });
+    
+    // 打印报告
+    document.querySelector('a[href="#"].btn-report:nth-child(2)').addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('打印报告');
+      
+      // 生成打印内容
+      printReport(reportData);
+    });
+    
+    // 邮件报告
+    document.querySelector('a[href="#"].btn-report:nth-child(3)').addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('邮件报告');
+      
+      // 生成邮件链接
+      emailReport(reportData);
+    });
+    
+    // 生成并下载PDF报告
+    function generateAndDownloadPDF(data) {
+      // 创建HTML格式的报告内容
+      const reportContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Breast Cancer Prediction Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            h1 { color: #333; text-align: center; }
+            .section { margin: 20px 0; }
+            .label { font-weight: bold; }
+            .important { margin-top: 30px; padding: 15px; background-color: #f0f0f0; border-left: 4px solid #333; }
+          </style>
+        </head>
+        <body>
+          <h1>Breast Cancer Prediction Report</h1>
+          
+          <div class="section">
+            <h2>Patient Information</h2>
+            <p><span class="label">Name:</span> {{ session.user_name }}</p>
+            <p><span class="label">Phone:</span> {{ session.user_phone }}</p>
+          </div>
+          
+          <div class="section">
+            <h2>Prediction Result</h2>
+            <p><span class="label">Tumor Type:</span> ${data.output}</p>
+            <p><span class="label">Probability (Benign):</span> ${(data.prob_benign * 100).toFixed(2)}%</p>
+            <p><span class="label">Probability (Malignant):</span> ${(data.prob_malignant * 100).toFixed(2)}%</p>
+          </div>
+          
+          <div class="section">
+            <h2>Model Information</h2>
+            <p><span class="label">Accuracy:</span> ${(data.accuracy * 100).toFixed(2)}%</p>
+            <p><span class="label">Inference Time:</span> ${data.time.toFixed(4)} seconds</p>
+          </div>
+          
+          <div class="important">
+        <h3>Important Note</h3>
+        <p>This prediction is based on a machine learning model and should not be considered a definitive medical diagnosis. Always consult with a qualified healthcare professional for proper medical advice.</p>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  // 创建Blob对象，使用HTML类型
+  const blob = new Blob([reportContent], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  
+  // 创建下载链接，使用.html扩展名
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `breast_cancer_report_${new Date().toISOString().split('T')[0]}.html`;
+  a.click();
+  
+  // 清理
+  URL.revokeObjectURL(url);
+  
+  console.log('HTML报告已下载');
+  alert('报告已下载为HTML格式，请在浏览器中打开并使用打印功能保存为PDF');
+}
+
+// 打印报告
+function printReport(data) {
+  // 创建打印窗口
+  const printWindow = window.open('', '_blank');
+  
+  // 构建打印内容
+  const printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Breast Cancer Prediction Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; text-align: center; }
+        .section { margin: 20px 0; }
+        .label { font-weight: bold; }
+        .important { margin-top: 30px; padding: 15px; background-color: #f0f0f0; border-left: 4px solid #333; }
+      </style>
+    </head>
+    <body>
+      <h1>Breast Cancer Prediction Report</h1>
+      
+      <div class="section">
+        <h2>Patient Information</h2>
+        <p><span class="label">Name:</span> {{ session.user_name }}</p>
+        <p><span class="label">Phone:</span> {{ session.user_phone }}</p>
+      </div>
+      
+      <div class="section">
+        <h2>Prediction Result</h2>
+        <p><span class="label">Tumor Type:</span> ${data.output}</p>
+        <p><span class="label">Probability (Benign):</span> ${(data.prob_benign * 100).toFixed(2)}%</p>
+        <p><span class="label">Probability (Malignant):</span> ${(data.prob_malignant * 100).toFixed(2)}%</p>
+      </div>
+      
+      <div class="section">
+        <h2>Model Information</h2>
+        <p><span class="label">Accuracy:</span> ${(data.accuracy * 100).toFixed(2)}%</p>
+        <p><span class="label">Inference Time:</span> ${data.time.toFixed(4)} seconds</p>
+      </div>
+      
+      <div class="important">
+        <h3>Important Note</h3>
+        <p>This prediction is based on a machine learning model and should not be considered a definitive medical diagnosis. Always consult with a qualified healthcare professional for proper medical advice.</p>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  // 写入打印内容
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+  
+  // 打印
+  printWindow.onload = function() {
+    printWindow.print();
+    printWindow.close();
+  };
+  
+  console.log('报告已打印');
+}
+
+// 邮件报告
+function emailReport(data) {
+  const subject = 'Breast Cancer Prediction Report';
+  const body = `Breast Cancer Prediction Report\n\n` +
+    `Patient Information:\n` +
+    `Name: {{ session.user_name }}\n` +
+    `Phone: {{ session.user_phone }}\n\n` +
+    `Prediction Result:\n` +
+    `Tumor Type: ${data.output}\n` +
+    `Probability (Benign): ${(data.prob_benign * 100).toFixed(2)}%\n` +
+    `Probability (Malignant): ${(data.prob_malignant * 100).toFixed(2)}%\n\n` +
+    `Model Information:\n` +
+    `Accuracy: ${(data.accuracy * 100).toFixed(2)}%\n` +
+    `Inference Time: ${data.time.toFixed(4)} seconds\n\n` +
+    `Important Note:\n` +
+    `This prediction is based on a machine learning model and should not be considered a definitive medical diagnosis. Always consult with a qualified healthcare professional for proper medical advice.`;
+  
+  const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoLink;
+  
+  console.log('邮件报告已发送');
+}
+
+console.log('=== 报告功能初始化完成 ===');
+});
+</script>
+
+<script>
+// 关怀消息功能 - 支持多语言
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('=== 关怀消息功能初始化 ===');
+  
+  const careSection = document.getElementById('care-messages-section');
+  const loadingIndicator = document.getElementById('care-loading');
+  const messagesContainer = document.getElementById('care-messages-container');
+  const errorMessage = document.getElementById('care-error');
+  
+  // 获取预测结果
+  const predictionOutput = '{{ output }}';
+  
+  // 获取当前语言（从localStorage或浏览器设置）
+  function getCurrentLang() {
+    const savedLang = localStorage.getItem('app_language');
+    if (savedLang && ['zh', 'en', 'fr', 'ru', 'es'].includes(savedLang)) {
+      return savedLang;
+    }
+    const browserLang = navigator.language || navigator.userLanguage;
+    if (browserLang.startsWith('zh')) return 'zh';
+    if (browserLang.startsWith('fr')) return 'fr';
+    if (browserLang.startsWith('ru')) return 'ru';
+    if (browserLang.startsWith('es')) return 'es';
+    return 'en';
+  }
+  
+  // 加载关怀消息
+  function loadCareMessages() {
+    if (!careSection || !loadingIndicator || !messagesContainer) {
+      console.error('关怀消息元素未找到');
+      return;
+    }
+    
+    // 显示加载状态
+    loadingIndicator.style.display = 'block';
+    messagesContainer.innerHTML = '';
+    errorMessage.style.display = 'none';
+    
+    // 发起请求
+    fetch(`/api/care-messages?outcome=${encodeURIComponent(predictionOutput)}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log('=== 前端收到关怀消息响应 ===');
+        console.log('完整响应:', data);
+        console.log('响应类型:', typeof data);
+        
+        // 隐藏加载状态
+        loadingIndicator.style.display = 'none';
+        
+        if (data.error) {
+          // 显示错误信息
+          errorMessage.textContent = data.error === 'login_required' ? '请先登录以获取关怀消息' : 
+                                    data.error === 'invalid_outcome' ? '无效的预测结果' : '获取关怀消息失败';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        
+        // 显示消息 - 支持多语言对象格式
+        let messagesToShow = data.messages;
+        console.log('messagesToShow:', messagesToShow, '类型:', typeof messagesToShow);
+        
+        // 如果 messages 是字符串，尝试解析为 JSON
+        if (typeof messagesToShow === 'string') {
+          console.log('尝试解析字符串为JSON...');
+          try {
+            messagesToShow = JSON.parse(messagesToShow);
+            console.log('解析成功:', messagesToShow);
+          } catch (e) {
+            console.log('消息不是有效的JSON，尝试提取JSON部分');
+            // 尝试从字符串中提取 JSON
+            const jsonMatch = messagesToShow.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              try {
+                messagesToShow = JSON.parse(jsonMatch[0]);
+                console.log('从文本中提取JSON成功:', messagesToShow);
+              } catch (e2) {
+                console.log('提取JSON失败');
+              }
+            }
+          }
+        }
+        
+        // 检查是否是嵌套在 data.messages.messages 中的情况
+        if (messagesToShow && typeof messagesToShow === 'object' && messagesToShow.messages) {
+          console.log('发现嵌套结构，提取 messages');
+          messagesToShow = messagesToShow.messages;
+        }
+        
+        console.log('最终处理的消息:', messagesToShow);
+        
+        if (messagesToShow && typeof messagesToShow === 'object') {
+          const currentLang = getCurrentLang();
+          console.log('当前语言:', currentLang);
+          
+          // 获取对应语言的消息，如果不存在则使用英文
+          const langMessages = {};
+          const langKeys = ['zh', 'en', 'fr', 'ru', 'es'];
+          const langNames = {
+            'zh': '中文',
+            'en': 'English',
+            'fr': 'Français',
+            'ru': 'Русский',
+            'es': 'Español'
+          };
+          
+          // 整理消息
+          langKeys.forEach(key => {
+            if (messagesToShow[key]) {
+              langMessages[key] = messagesToShow[key];
+            }
+          });
+          
+          console.log('整理后的消息:', langMessages);
+          
+          // 如果当前语言没有消息，使用英文作为后备
+          if (!langMessages[currentLang] && langMessages['en']) {
+            langMessages[currentLang] = langMessages['en'];
+          }
+          
+          // 显示所有语言的消息（用于展示多语言支持）
+          const messageKeys = Object.keys(langMessages);
+          console.log('要显示的语言:', messageKeys);
+          
+          if (messageKeys.length > 0) {
+            messageKeys.forEach((key, index) => {
+              const messageItem = document.createElement('div');
+              messageItem.className = 'care-message';
+              messageItem.style.animationDelay = `${index * 0.15}s`;
+              
+              const icon = document.createElement('span');
+              icon.className = 'care-message__icon';
+              icon.innerHTML = '&#10084;';
+              
+              const content = document.createElement('div');
+              content.style.display = 'flex';
+              content.style.flexDirection = 'column';
+              content.style.gap = '4px';
+              
+              const langLabel = document.createElement('span');
+              langLabel.style.fontSize = '0.75rem';
+              langLabel.style.color = '#e84a8a';
+              langLabel.style.fontWeight = '600';
+              langLabel.textContent = langNames[key] || key.toUpperCase();
+              
+              const text = document.createElement('p');
+              text.className = 'care-message__text';
+              text.textContent = langMessages[key];
+              text.style.margin = '0';
+              
+              content.appendChild(langLabel);
+              content.appendChild(text);
+              
+              messageItem.appendChild(icon);
+              messageItem.appendChild(content);
+              messagesContainer.appendChild(messageItem);
+            });
+          } else {
+            // 如果没有找到有效格式，显示原始内容
+            const messageItem = document.createElement('div');
+            messageItem.className = 'care-message';
+            
+            const icon = document.createElement('span');
+            icon.className = 'care-message__icon';
+            icon.innerHTML = '&#10084;';
+            
+            const text = document.createElement('p');
+            text.className = 'care-message__text';
+            text.textContent = String(data.messages).substring(0, 500);
+            
+            messageItem.appendChild(icon);
+            messageItem.appendChild(text);
+            messagesContainer.appendChild(messageItem);
+          }
+        } else if (data.messages && Array.isArray(data.messages)) {
+          // 兼容旧格式（数组）
+          data.messages.forEach((message, index) => {
+            const messageItem = document.createElement('div');
+            messageItem.className = 'care-message';
+            messageItem.style.animationDelay = `${index * 0.15}s`;
+            
+            const icon = document.createElement('span');
+            icon.className = 'care-message__icon';
+            icon.innerHTML = '&#10084;';
+            
+            const text = document.createElement('p');
+            text.className = 'care-message__text';
+            text.textContent = message;
+            
+            messageItem.appendChild(icon);
+            messageItem.appendChild(text);
+            messagesContainer.appendChild(messageItem);
+          });
+        }
+      })
+      .catch(error => {
+        loadingIndicator.style.display = 'none';
+        errorMessage.textContent = '获取关怀消息时发生错误';
+        errorMessage.style.display = 'block';
+        console.error('关怀消息加载失败:', error);
+      });
+  }
+  
+  // 加载消息
+  loadCareMessages();
+  
+  console.log('=== 关怀消息功能初始化完成 ===');
+});
+</script>
+
+{% set assistant_context = {
+  'page': 'result',
+  'prediction': output,
+  'prob_benign': prob_benign,
+  'prob_malignant': prob_malignant,
+  'holdout_accuracy': accuracy
+} %}
+{% include 'assistant_widget.html' %}
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理员后台 - 乳腺癌AI预测平台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    :root {
+      --primary-color: #e91e63;
+      --primary-light: #f8bbd0;
+      --secondary-color: #9c27b0;
+      --background-dark: #1a1a2e;
+      --background-card: rgba(26, 26, 46, 0.9);
+      --text-primary: #ffffff;
+      --text-secondary: #b0bec5;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
+      --radius-lg: 16px;
+      --radius-md: 8px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--background-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    
+    .app-body {
+      position: relative;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+    }
+    
+    /* Header */
+    .header {
+      padding: 2rem 0;
+      position: relative;
+      z-index: 2;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary-color);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: white;
+    }
+    
+    .logo-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    /* Main Content */
+    .main-content {
+      padding: 2rem 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .page-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+    
+    .page-subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+    
+    /* Users Table */
+    .users-table-card {
+      background: var(--background-card);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    th {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      color: var(--primary-light);
+      background: rgba(233, 30, 99, 0.1);
+    }
+    
+    tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .user-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .user-phone {
+      color: var(--text-secondary);
+    }
+    
+    .user-age {
+      color: var(--text-secondary);
+    }
+    
+    .prediction-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
+      background: rgba(233, 30, 99, 0.15);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      color: var(--primary-light);
+    }
+    
+    .btn-view {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: var(--radius-md);
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    
+    .btn-view:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(233, 30, 99, 0.4);
+      color: white;
+      text-decoration: none;
+    }
+    
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    
+    .btn-logout:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary-color);
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .stat-card {
+      background: rgba(233, 30, 99, 0.1);
+      border: 1px solid rgba(233, 30, 99, 0.2);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.5rem;
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .stat-card-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-light);
+    }
+    
+    .stat-card-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 1.5rem;
+      }
+      
+      th, td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+      }
+      
+      .btn-view {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body class="app-body">
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="logo">
+            <div class="logo-icon">
+              <i class="fa fa-heartbeat"></i>
+            </div>
+            <div class="logo-text">管理员后台</div>
+          </div>
+        </div>
+        <div class="col-md-6 text-right">
+          <a href="{{ url_for('logout') }}" class="btn-logout">
+            <i class="fa fa-sign-out"></i>
+            退出登录
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="row">
+        <div class="col-md-12">
+          <h1 class="page-title">用户列表</h1>
+          <p class="page-subtitle">查看所有注册用户及其预测记录统计</p>
+          
+          <!-- Stats -->
+          <div class="stats-bar">
+            <div class="stat-card">
+              <div class="stat-card-value">{{ users|length }}</div>
+              <div class="stat-card-label">注册用户</div>
+            </div>
+          </div>
+          
+          <!-- Users Table -->
+          <div class="users-table-card">
+            {% if users %}
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>姓名</th>
+                    <th>手机号</th>
+                    <th>年龄</th>
+                    <th>预测次数</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for user in users %}
+                  <tr>
+                    <td>#{{ user.id }}</td>
+                    <td class="user-name">{{ user.name }}</td>
+                    <td class="user-phone">{{ user.phone }}</td>
+                    <td class="user-age">{{ user.age }}岁</td>
+                    <td>
+                      <span class="prediction-count">
+                        <i class="fa fa-bar-chart"></i>
+                        {{ user.prediction_count }}
+                      </span>
+                    </td>
+                    <td>
+                      <a href="{{ url_for('admin_user_detail', user_id=user.id) }}" class="btn-view">
+                        <i class="fa fa-eye"></i>
+                        查看详情
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+              <i class="fa fa-users"></i>
+              <p>暂无注册用户</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer style="margin-top: 4rem; padding: 2rem 0; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
+      <p>© 2024 乳腺癌AI预测平台 - 管理员后台</p>
+    </footer>
+  </div>
+</body>
+</html>

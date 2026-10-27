@@ -1,0 +1,19 @@
+# 基础依赖
+flask==2.3.3
+numpy==1.26.4
+scikit-learn==1.3.2
+scipy==1.11.4
+
+# 环境配置
+python-dotenv==1.0.0
+
+# 生产环境优化
+flask-talisman==1.1.0      # 安全头部
+flask-compress==1.14       # 响应压缩
+gunicorn==21.2.0          # WSGI服务器
+
+# 数据库
+sqlite3                   # Python内置
+
+# 其他
+requests==2.31.0

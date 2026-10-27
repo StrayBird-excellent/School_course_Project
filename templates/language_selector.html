@@ -1,0 +1,73 @@
+<!-- 语言选择器 -->
+<div class="language-selector-wrapper" style="position: relative; z-index: 1000;">
+  <div class="language-selector" id="languageSelector">
+    <i class="fa fa-globe"></i>
+    <span id="currentLanguage">English</span>
+    <i class="fa fa-chevron-down"></i>
+    <div class="language-dropdown" id="languageDropdown">
+      <div class="language-option" data-lang="en">English</div>
+      <div class="language-option" data-lang="zh">中文</div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .language-selector-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .language-selector {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #ffffff;
+  }
+
+  .language-selector:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .language-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: rgba(26, 26, 46, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    min-width: 120px;
+    display: none;
+    z-index: 1001;
+    backdrop-filter: blur(10px);
+  }
+
+  .language-dropdown.show {
+    display: block;
+  }
+
+  .language-option {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    color: #ffffff;
+  }
+
+  .language-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .language-option.selected {
+    background: rgba(233, 30, 99, 0.2);
+    color: #f8bbd0;
+  }
+</style>

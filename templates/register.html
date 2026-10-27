@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <title>注册账户 - 乳腺癌AI预测平台</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <style>
+    a, a:hover { text-decoration: none; }
+    .register-container {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .register-panel {
+      width: 100%;
+      max-width: 500px;
+      padding: 2.5rem 2rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-lg);
+    }
+    .register-panel h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 1.5rem;
+      letter-spacing: -0.02em;
+      text-align: center;
+    }
+    .register-panel .form-group {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+    .register-panel .control-label {
+      font-weight: 500;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .register-panel .form-control {
+      height: auto;
+      min-height: 48px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .register-panel .form-control:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+      background: rgba(0, 0, 0, 0.45);
+    }
+    .register-panel .form-control::placeholder {
+      color: rgba(139, 150, 168, 0.65);
+    }
+    /* 验证状态样式 */
+    .register-panel .form-control.valid {
+      border-color: #27ae60 !important;
+    }
+    .register-panel .form-control.invalid {
+      border-color: #e74c3c !important;
+    }
+    .validation-icon {
+      position: absolute;
+      right: 1rem;
+      top: 38px;
+      font-size: 1.1rem;
+      display: none;
+    }
+    .validation-icon.valid {
+      color: #27ae60;
+      display: block;
+    }
+    .validation-icon.invalid {
+      color: #e74c3c;
+      display: block;
+    }
+    .validation-message {
+      font-size: 0.82rem;
+      margin-top: 0.35rem;
+      display: none;
+      padding-left: 0.25rem;
+    }
+    .validation-message.error {
+      color: #e74c3c;
+      display: block;
+    }
+    .validation-message.success {
+      color: #27ae60;
+      display: block;
+    }
+    .btn-register {
+      margin-top: 1rem;
+      padding: 0.75rem 2rem;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: #041210 !important;
+      background: linear-gradient(145deg, var(--accent) 0%, #2eb8a8 100%) !important;
+      border: none !important;
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 32px var(--accent-glow);
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      width: 100%;
+    }
+    .btn-register:hover:not(:disabled),
+    .btn-register:focus:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 40px var(--accent-glow);
+      color: #041210 !important;
+    }
+    .btn-register:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .register-footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+    .register-footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .register-footer a:hover {
+      opacity: 0.9;
+    }
+    .error-message {
+      color: var(--danger);
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      background: rgba(231, 76, 60, 0.1);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(231, 76, 60, 0.25);
+    }
+  </style>
+</head>
+<body class="app-body">
+
+{% include "footer.html" %}
+
+<div class="container main-wrap">
+  <div class="register-container">
+    <div class="register-panel">
+      <h2>注册账户</h2>
+      {% if error %}
+        <div class="error-message">{{ error }}</div>
+      {% endif %}
+      <form id="registerForm" action="/register" method="post" novalidate>
+        <div class="form-group">
+          <label class="control-label" for="name">
+            <i class="fa fa-user"></i>
+            姓名
+          </label>
+          <input type="text" class="form-control" id="name" placeholder="请输入真实姓名" name="name" required>
+          <span class="validation-icon" id="name-icon"></span>
+          <div class="validation-message" id="name-message"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="control-label" for="id_card">
+            <i class="fa fa-id-card"></i>
+            身份证号
+          </label>
+          <input type="text" class="form-control" id="id_card" placeholder="请输入18位身份证号" name="id_card" required maxlength="18">
+          <span class="validation-icon" id="id_card-icon"></span>
+          <div class="validation-message" id="id_card-message"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="control-label" for="phone">
+            <i class="fa fa-phone"></i>
+            手机号
+          </label>
+          <input type="tel" class="form-control" id="phone" placeholder="请输入11位手机号" name="phone" required maxlength="11">
+          <span class="validation-icon" id="phone-icon"></span>
+          <div class="validation-message" id="phone-message"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="control-label" for="age">
+            <i class="fa fa-birthday-cake"></i>
+            年龄
+          </label>
+          <input type="number" class="form-control" id="age" placeholder="请输入年龄" name="age" required min="1" max="120">
+          <span class="validation-icon" id="age-icon"></span>
+          <div class="validation-message" id="age-message"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="control-label" for="password">
+            <i class="fa fa-lock"></i>
+            密码
+          </label>
+          <input type="password" class="form-control" id="password" placeholder="请设置密码（至少6位）" name="password" required minlength="6">
+          <span class="validation-icon" id="password-icon"></span>
+          <div class="validation-message" id="password-message"></div>
+        </div>
+        
+        <button class="btn btn-register" type="submit" id="registerBtn">注册</button>
+        
+        <div class="register-footer">
+          已有账户？ <a href="{{ url_for('login') }}">立即登录</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+(function() {
+  'use strict';
+  
+  // 验证状态
+  const validationState = {
+    name: false,
+    id_card: false,
+    phone: false,
+    age: false,
+    password: false
+  };
+  
+  // 验证函数 - 手机号
+  function validatePhone(phone) {
+    // 清理空格
+    phone = phone.replace(/\s+/g, '');
+    
+    // 检查是否为空
+    if (!phone) {
+      return { valid: false, message: '请输入手机号' };
+    }
+    
+    // 检查长度
+    if (phone.length !== 11) {
+      return { valid: false, message: '手机号必须为11位' };
+    }
+    
+    // 检查是否全为数字
+    if (!/^\d+$/.test(phone)) {
+      return { valid: false, message: '手机号只能包含数字' };
+    }
+    
+    // 检查号段
+    const validPhoneSegments = {
+      chinaMobile: [
+        /^13[4-9]/, /^15[0-2]/, /^15[7-9]/, /^18[2-4]/, /^18[7-8]/, /^198/
+      ],
+      chinaUnicom: [
+        /^13[0-2]/, /^15[5-6]/, /^18[5-6]/, /^17[5-6]/, /^166/
+      ],
+      chinaTelecom: [
+        /^133/, /^153/, /^18[0-1]/, /^189/, /^191/, /^199/
+      ],
+      virtualOperator: [
+        /^17[0-1]/, /^162/, /^165/, /^167/
+      ]
+    };
+    
+    let isValidSegment = false;
+    let operatorName = '';
+    
+    for (const [operator, regexList] of Object.entries(validPhoneSegments)) {
+      for (const regex of regexList) {
+        if (regex.test(phone)) {
+          isValidSegment = true;
+          switch (operator) {
+            case 'chinaMobile': operatorName = '中国移动'; break;
+            case 'chinaUnicom': operatorName = '中国联通'; break;
+            case 'chinaTelecom': operatorName = '中国电信'; break;
+            case 'virtualOperator': operatorName = '虚拟运营商'; break;
+          }
+          break;
+        }
+      }
+      if (isValidSegment) break;
+    }
+    
+    if (!isValidSegment) {
+      return { valid: false, message: '手机号号段无效，请输入有效的中国手机号' };
+    }
+    
+    return { 
+      valid: true, 
+      message: `格式正确（${operatorName}）` 
+    };
+  }
+  
+  // 验证函数 - 身份证
+  function validateIdCard(idCard) {
+    // 清理空格
+    idCard = idCard.replace(/\s+/g, '');
+    
+    if (!idCard) {
+      return { valid: false, message: '请输入身份证号' };
+    }
+    
+    if (idCard.length !== 18) {
+      return { valid: false, message: '身份证号必须为18位' };
+    }
+    
+    // 基础格式正则
+    const idCardRegex = /^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/;
+    if (!idCardRegex.test(idCard)) {
+      if (!/^[1-9]\d{5}/.test(idCard)) {
+        return { valid: false, message: '地址码格式错误' };
+      }
+      if (!/(19|20)\d{2}/.test(idCard.substring(6, 10))) {
+        return { valid: false, message: '出生日期年份无效' };
+      }
+      if (!/(0[1-9]|1[0-2])/.test(idCard.substring(10, 12))) {
+        return { valid: false, message: '出生月份无效' };
+      }
+      if (!/(0[1-9]|[12]\d|3[01])/.test(idCard.substring(12, 14))) {
+        return { valid: false, message: '出生日期无效' };
+      }
+      if (!/[\dXx]$/.test(idCard)) {
+        return { valid: false, message: '校验码格式错误，最后一位应为0-9或X' };
+      }
+      return { valid: false, message: '身份证格式不正确' };
+    }
+    
+    // 验证出生日期
+    const birthYear = parseInt(idCard.substring(6, 10));
+    const birthMonth = parseInt(idCard.substring(10, 12));
+    const birthDay = parseInt(idCard.substring(12, 14));
+    
+    const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+    if (
+      birthDate.getFullYear() !== birthYear ||
+      birthDate.getMonth() !== birthMonth - 1 ||
+      birthDate.getDate() !== birthDay
+    ) {
+      return { valid: false, message: '出生日期无效，请检查年月日' };
+    }
+    
+    const today = new Date();
+    if (birthDate > today) {
+      return { valid: false, message: '出生日期不能在未来' };
+    }
+    
+    if (today.getFullYear() - birthYear > 150) {
+      return { valid: false, message: '出生日期不合理（年龄超过150岁）' };
+    }
+    
+    // ISO 7064:1983 MOD 11-2 校验码计算
+    const coefficients = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
+    const checkCodes = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
+    
+    let sum = 0;
+    for (let i = 0; i < 17; i++) {
+      sum += parseInt(idCard[i]) * coefficients[i];
+    }
+    
+    const remainder = sum % 11;
+    const expectedCheckCode = checkCodes[remainder];
+    const actualCheckCode = idCard[17].toUpperCase();
+    
+    if (actualCheckCode !== expectedCheckCode) {
+      return { valid: false, message: '校验码错误，请检查身份证号' };
+    }
+    
+    // 性别判断
+    const genderDigit = parseInt(idCard[16]);
+    const gender = genderDigit % 2 === 1 ? '男' : '女';
+    
+    return {
+      valid: true,
+      message: `格式正确（${birthYear}年${birthMonth}月${birthDay}日，${gender}）`
+    };
+  }
+  
+  // 验证姓名
+  function validateName(name) {
+    name = name.trim();
+    if (!name) {
+      return { valid: false, message: '请输入姓名' };
+    }
+    if (name.length < 2) {
+      return { valid: false, message: '姓名至少需要2个字符' };
+    }
+    if (name.length > 30) {
+      return { valid: false, message: '姓名过长，请检查' };
+    }
+    if (/^\d+$/.test(name)) {
+      return { valid: false, message: '姓名不能全为数字' };
+    }
+    return { valid: true, message: '格式正确' };
+  }
+  
+  // 验证年龄
+  function validateAge(age) {
+    age = parseInt(age);
+    if (isNaN(age)) {
+      return { valid: false, message: '请输入年龄' };
+    }
+    if (age < 1 || age > 120) {
+      return { valid: false, message: '年龄必须在1-120岁之间' };
+    }
+    return { valid: true, message: '格式正确' };
+  }
+  
+  // 验证密码
+  function validatePassword(password) {
+    if (!password) {
+      return { valid: false, message: '请设置密码' };
+    }
+    if (password.length < 6) {
+      return { valid: false, message: '密码至少需要6位' };
+    }
+    if (password.length > 50) {
+      return { valid: false, message: '密码过长' };
+    }
+    return { valid: true, message: '格式正确' };
+  }
+  
+  // 设置验证显示
+  function setValidationState(fieldId, result) {
+    const input = document.getElementById(fieldId);
+    const icon = document.getElementById(fieldId + '-icon');
+    const message = document.getElementById(fieldId + '-message');
+    
+    if (!input || !icon || !message) return;
+    
+    if (result.valid) {
+      validationState[fieldId] = true;
+      input.classList.remove('invalid');
+      input.classList.add('valid');
+      icon.className = 'validation-icon valid';
+      icon.innerHTML = '<i class="fa fa-check-circle"></i>';
+      message.className = 'validation-message success';
+      message.textContent = result.message;
+    } else {
+      validationState[fieldId] = false;
+      input.classList.remove('valid');
+      input.classList.add('invalid');
+      icon.className = 'validation-icon invalid';
+      icon.innerHTML = '<i class="fa fa-exclamation-circle"></i>';
+      message.className = 'validation-message error';
+      message.textContent = result.message;
+    }
+    
+    updateSubmitButton();
+  }
+  
+  // 更新提交按钮状态
+  function updateSubmitButton() {
+    const btn = document.getElementById('registerBtn');
+    if (
+      validationState.name &&
+      validationState.id_card &&
+      validationState.phone &&
+      validationState.age &&
+      validationState.password
+    ) {
+      btn.disabled = false;
+    } else {
+      btn.disabled = true;
+    }
+  }
+  
+  // 绑定验证事件
+  document.getElementById('name').addEventListener('input', function() {
+    const result = validateName(this.value);
+    if (this.value.length > 0) {
+      setValidationState('name', result);
+    }
+  });
+  
+  document.getElementById('id_card').addEventListener('input', function() {
+    this.value = this.value.toUpperCase();
+    const result = validateIdCard(this.value);
+    if (this.value.length > 0) {
+      setValidationState('id_card', result);
+    }
+  });
+  
+  document.getElementById('phone').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+    const result = validatePhone(this.value);
+    if (this.value.length > 0) {
+      setValidationState('phone', result);
+    }
+  });
+  
+  document.getElementById('age').addEventListener('input', function() {
+    const result = validateAge(this.value);
+    if (this.value.length > 0) {
+      setValidationState('age', result);
+    }
+  });
+  
+  document.getElementById('password').addEventListener('input', function() {
+    const result = validatePassword(this.value);
+    if (this.value.length > 0) {
+      setValidationState('password', result);
+    }
+  });
+  
+  // 表单提交验证
+  document.getElementById('registerForm').addEventListener('submit', function(e) {
+    let allValid = true;
+    
+    const nameResult = validateName(document.getElementById('name').value);
+    if (!nameResult.valid) {
+      setValidationState('name', nameResult);
+      allValid = false;
+    }
+    
+    const idResult = validateIdCard(document.getElementById('id_card').value);
+    if (!idResult.valid) {
+      setValidationState('id_card', idResult);
+      allValid = false;
+    }
+    
+    const phoneResult = validatePhone(document.getElementById('phone').value);
+    if (!phoneResult.valid) {
+      setValidationState('phone', phoneResult);
+      allValid = false;
+    }
+    
+    const ageResult = validateAge(document.getElementById('age').value);
+    if (!ageResult.valid) {
+      setValidationState('age', ageResult);
+      allValid = false;
+    }
+    
+    const passwordResult = validatePassword(document.getElementById('password').value);
+    if (!passwordResult.valid) {
+      setValidationState('password', passwordResult);
+      allValid = false;
+    }
+    
+    if (!allValid) {
+      e.preventDefault();
+    }
+  });
+  
+})();
+</script>
+</body>
+</html>

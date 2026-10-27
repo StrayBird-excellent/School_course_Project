@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Login - Breast Cancer AI Prediction Platform</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    :root {
+      --primary-color: #e91e63;
+      --primary-light: #f8bbd0;
+      --secondary-color: #9c27b0;
+      --background-dark: #1a1a2e;
+      --background-card: rgba(26, 26, 46, 0.9);
+      --text-primary: #ffffff;
+      --text-secondary: #b0bec5;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.3);
+      --radius-lg: 16px;
+      --radius-md: 8px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--background-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .app-body {
+      position: relative;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    
+    .app-body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="grad1" cx="50%" cy="50%" r="70%"><stop offset="0%" style="stop-color:rgba(233,30,99,0.1)"/><stop offset="100%" style="stop-color:rgba(156,39,176,0.1)"/></radialGradient></defs><rect width="100%" height="100%" fill="url(%23grad1)"/></svg>');
+      z-index: 0;
+    }
+    
+    /* Background Image */
+    .background-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><linearGradient id="breastGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:rgba(233,30,99,0.3)"/><stop offset="100%" style="stop-color:rgba(156,39,176,0.3)"/></linearGradient></defs><path d="M300,200 Q500,100 700,200 Q800,300 700,400 Q500,500 300,400 Q200,300 300,200" fill="url(%23breastGrad)" opacity="0.6"/><circle cx="450" cy="300" r="50" fill="rgba(233,30,99,0.8)"/></svg>') no-repeat center center;
+      background-size: contain;
+      opacity: 0.6;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .container {
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Header */
+    .header {
+      padding: 2rem 0;
+      position: relative;
+      z-index: 2;
+    }
+    
+    /* 确保header和main-content的容器padding一致 */
+    .header .row,
+    .main-content .row {
+      margin: 0 -15px;
+    }
+    
+    .header .col-md-6,
+    .main-content .col-md-6 {
+      padding: 0 15px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary-color);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: white;
+    }
+    
+    .logo-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .language-selector {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .language-selector:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .language-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      background: var(--background-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      min-width: 120px;
+      display: none;
+      z-index: 1001;
+    }
+    
+    .language-dropdown.show {
+      display: block;
+    }
+    
+    .language-option {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    
+    .language-option:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .language-option.selected {
+      background: rgba(233, 30, 99, 0.2);
+      color: var(--primary-light);
+    }
+    
+    /* Main Content */
+    .main-content {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+      padding: 2rem 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+      color: var(--text-primary);
+      position: relative;
+    }
+    
+    .hero-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 80px;
+      height: 3px;
+      background: var(--primary-color);
+    }
+    
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+    
+    .hero-features {
+      margin: 3rem 0;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(233, 30, 99, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-color);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    .feature-text {
+      flex: 1;
+    }
+    
+    .feature-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
+    }
+    
+    .feature-description {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    
+    /* Stats */
+    .stats-container {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    
+    .stat-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      text-align: center;
+      flex: 1;
+    }
+    
+    .stat-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-light);
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Scroll Indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      gap: 0.5rem;
+    }
+    
+    .scroll-indicator i {
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+    
+    /* Login Panel */
+    .login-section {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 2rem 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* 确保登录框与语言切换按钮右边缘对齐 */
+    .login-section .col-md-6 {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .login-container {
+      width: 100%;
+      max-width: 360px;
+    }
+    
+    .login-panel {
+      width: 100%;
+      max-width: 360px;
+      padding: 2.5rem;
+      border-radius: var(--radius-lg);
+      background: var(--background-card);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* 确保语言选择器与登录框右边缘精确对齐 */
+    .header .col-md-6.text-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    
+    .language-selector {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .login-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    .login-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+    
+    .login-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      position: relative;
+    }
+    
+    .login-subtitle::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+    }
+    
+    /* Form Styles */
+    
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    .form-control-wrapper {
+      position: relative;
+    }
+    
+    .form-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 16px;
+      z-index: 1;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 3rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .form-control::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 1;
+      transition: color 0.3s ease;
+    }
+    
+    .password-toggle:hover {
+      color: var(--text-primary);
+    }
+    
+    .remember-me {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    
+    .remember-me label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    
+    .remember-me input[type="checkbox"] {
+      accent-color: var(--primary-color);
+    }
+    
+    .forgot-password {
+      font-size: 0.9rem;
+      color: var(--primary-light);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .forgot-password:hover {
+      color: var(--primary-color);
+      text-decoration: underline;
+    }
+    
+    /* Button Styles */
+    .btn-login {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: var(--radius-md);
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(233, 30, 99, 0.4);
+    }
+    
+    .btn-login:active {
+      transform: translateY(0);
+    }
+    
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 2rem 0;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    
+    .divider-text {
+      padding: 0 1rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    
+    /* Social Login */
+    .social-login {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .social-btn {
+      flex: 1;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .social-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary-color);
+    }
+    
+    /* Footer */
+    .login-footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .login-footer a {
+      color: var(--primary-light);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .login-footer a:hover {
+      color: var(--primary-color);
+      text-decoration: underline;
+    }
+    
+    /* Error Message */
+    .error-message {
+      background: rgba(239, 83, 80, 0.1);
+      border: 1px solid rgba(239, 83, 80, 0.3);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      color: #ef5350;
+      font-size: 0.9rem;
+    }
+    
+    /* Music Player */
+    .music-player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 46, 0.95);
+      border-top: 1px solid var(--border-color);
+      padding: 1rem;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+    }
+    
+    .music-info {
+      flex: 1;
+      margin-right: 1rem;
+    }
+    
+    .music-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    
+    .music-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .music-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .music-btn:hover {
+      color: var(--primary-light);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .music-btn:active {
+      transform: scale(0.95);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .stats-container {
+        flex-wrap: wrap;
+      }
+      
+      .stat-item {
+        flex: 1 1 45%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-content {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .hero-section {
+        order: 2;
+        margin-top: 2rem;
+      }
+      
+      .login-section {
+        order: 1;
+        justify-content: center;
+      }
+      
+      .hero-title {
+        font-size: 1.75rem;
+      }
+      
+      .hero-title::after {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      
+      .feature-item {
+        justify-content: center;
+      }
+      
+      .stats-container {
+        flex-direction: column;
+      }
+      
+      .stat-item {
+        flex: 1 1 100%;
+      }
+      
+      .login-panel {
+        margin: 0 1rem;
+      }
+      
+      .scroll-indicator {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .login-panel {
+        padding: 2rem;
+      }
+      
+      .hero-title {
+        font-size: 1.5rem;
+      }
+      
+      .social-login {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body class="app-body">
+
+<div class="background-image"></div>
+
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="fa fa-heartbeat"></i>
+          </div>
+          <div class="logo-text" data-i18n="logo_text">Breast Cancer AI Prediction Platform</div>
+        </div>
+      </div>
+      <div class="col-md-6 text-right">
+        <div class="language-selector" id="languageSelector">
+          <i class="fa fa-globe"></i>
+          <span id="currentLanguage">English</span>
+          <i class="fa fa-chevron-down"></i>
+          <div class="language-dropdown" id="languageDropdown">
+            <div class="language-option" data-lang="en">English</div>
+            <div class="language-option" data-lang="zh">中文</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="row">
+      <!-- Hero Section -->
+      <div class="col-md-6 hero-section">
+        <h1 class="hero-title" data-i18n="hero_title">AI-Driven Insights<br>For Better Outcomes</h1>
+        <p class="hero-subtitle" data-i18n="hero_subtitle">Advanced AI models for early prediction, risk assessment, and personalized treatment guidance.</p>
+        
+        <div class="hero-features">
+          <div class="feature-item">
+            <div class="feature-icon">
+              <i class="fa fa-microchip"></i>
+            </div>
+            <div class="feature-text">
+              <div class="feature-title" data-i18n="feature_1_title">AI-Powered Prediction</div>
+              <div class="feature-description" data-i18n="feature_1_desc">High-accuracy risk assessment using advanced machine learning algorithms.</div>
+            </div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon">
+              <i class="fa fa-line-chart"></i>
+            </div>
+            <div class="feature-text">
+              <div class="feature-title" data-i18n="feature_2_title">Evidence-Based Insights</div>
+              <div class="feature-description" data-i18n="feature_2_desc">Data-driven clinical decision support for healthcare professionals.</div>
+            </div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon">
+              <i class="fa fa-lock"></i>
+            </div>
+            <div class="feature-text">
+              <div class="feature-title" data-i18n="feature_3_title">Secure & Private</div>
+              <div class="feature-description" data-i18n="feature_3_desc">Enterprise-grade data protection and privacy compliance.</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stats-container">
+          <div class="stat-item">
+            <div class="stat-value">98.7%</div>
+            <div class="stat-label" data-i18n="stat_1_label">Model Accuracy</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">200K+</div>
+            <div class="stat-label" data-i18n="stat_2_label">Cases Analyzed</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">120+</div>
+            <div class="stat-label" data-i18n="stat_3_label">Partner Hospitals</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Login Section -->
+      <div class="col-md-6 login-section">
+        <div class="login-container">
+          <div class="login-panel">
+          <div class="login-header">
+            <h2 class="login-title" data-i18n="login_title">Welcome Back</h2>
+            <p class="login-subtitle" data-i18n="login_subtitle">Sign in to your account</p>
+          </div>
+          
+          {% if error %}
+            <div class="error-message">{{ error }}</div>
+          {% endif %}
+          
+          <form action="/login" method="post" id="loginForm" novalidate>
+            <div class="form-group">
+              <div class="form-control-wrapper">
+                <i class="fa fa-user form-icon"></i>
+                <input type="tel" class="form-control" id="phone" data-i18n-placeholder="placeholder_phone" placeholder="Phone number" name="phone">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <div class="form-control-wrapper">
+                <i class="fa fa-lock form-icon"></i>
+                <input type="password" class="form-control" id="password" data-i18n-placeholder="placeholder_password" placeholder="Password" name="password">
+                <i class="fa fa-eye password-toggle" id="togglePassword"></i>
+              </div>
+            </div>
+            
+            <div class="remember-me">
+              <label>
+                <input type="checkbox" name="remember">
+                <span data-i18n="remember_me">Remember me</span>
+              </label>
+              <a href="#" class="forgot-password" data-i18n="forgot_password">Forgot password?</a>
+            </div>
+            
+            <button class="btn-login" type="submit">
+              <span data-i18n="btn_login">Sign In</span>
+              <i class="fa fa-arrow-right"></i>
+            </button>
+            
+            <div class="divider">
+              <span class="divider-text" data-i18n="divider_text">or continue with</span>
+            </div>
+            
+            <div class="social-login">
+              <button type="button" class="social-btn">
+                <i class="fa fa-google"></i>
+                <span data-i18n="social_google">Google</span>
+              </button>
+              <button type="button" class="social-btn">
+                <i class="fa fa-windows"></i>
+                <span data-i18n="social_microsoft">Microsoft</span>
+              </button>
+            </div>
+            
+            <div class="login-footer">
+              <span data-i18n="footer_text">Don't have an account?</span> <a href="{{ url_for('register') }}" data-i18n="footer_link">Contact Admin</a>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer style="margin-top: 4rem; padding: 2rem 0; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
+    <p data-i18n="copyright">© 2024 Breast Cancer AI Prediction Platform. All rights reserved.</p>
+    <p data-i18n="footer_tagline">Secure. Reliable. Intelligent.</p>
+  </footer>
+</div>
+
+<!-- Music Player -->
+<div class="music-player">
+  <div class="music-info">
+    <p class="music-title" id="current-song">Lata Mangeshkar - Aankhein Khuli</p>
+  </div>
+  <div class="music-controls">
+    <button class="music-btn" id="prev-btn" aria-label="上一首"><i class="fa fa-step-backward"></i></button>
+    <button class="music-btn" id="play-btn" aria-label="播放/暂停"><i class="fa fa-play"></i></button>
+    <button class="music-btn" id="next-btn" aria-label="下一首"><i class="fa fa-step-forward"></i></button>
+  </div>
+  <audio id="audio-player" preload="auto">
+    <source src="/static/music/Lata Mangeshkar - Aankhein Khuli.mp3" type="audio/mpeg">
+   </audio>
+</div>
+
+<script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+<script>
+  // 页面加载完成后初始化语言设置
+  document.addEventListener('DOMContentLoaded', function() {
+    // 初始化多语言（包含语言选择器事件绑定）
+    initLanguage();
+    
+    // 表单验证和提交处理
+    const loginForm = document.getElementById('loginForm');
+    const phoneInput = document.getElementById('phone');
+    const passwordInput = document.getElementById('password');
+    
+    // 自定义表单验证
+    loginForm.addEventListener('submit', function(e) {
+      // 清除之前的错误样式
+      phoneInput.classList.remove('error');
+      passwordInput.classList.remove('error');
+      
+      let isValid = true;
+      
+      // 验证手机号
+      if (!phoneInput.value.trim()) {
+        phoneInput.classList.add('error');
+        isValid = false;
+      }
+      
+      // 验证密码
+      if (!passwordInput.value.trim()) {
+        passwordInput.classList.add('error');
+        isValid = false;
+      }
+      
+      // 如果验证失败，阻止表单提交
+      if (!isValid) {
+        e.preventDefault();
+        return false;
+      }
+      
+      // 验证通过，提交表单
+      return true;
+    });
+    
+    // 密码显示/隐藏功能
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      const icon = this;
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    });
+  });
+  
+  // 音乐播放器功能
+  window.onload = function() {
+    // 获取DOM元素
+    var audioPlayer = document.getElementById('audio-player');
+    var playBtn = document.getElementById('play-btn');
+    var prevBtn = document.getElementById('prev-btn');
+    var nextBtn = document.getElementById('next-btn');
+    var currentSong = document.getElementById('current-song');
+    
+    // 歌单 - 使用绝对路径
+    var playlist = [
+      {
+        title: 'Lata Mangeshkar - Aankhein Khuli',
+        src: '/static/music/Lata Mangeshkar - Aankhein Khuli.mp3'
+      }
+      // 可以添加更多歌曲
+    ];
+    
+    var currentIndex = 0;
+    
+    // 播放/暂停功能
+    playBtn.onclick = function() {
+      if (audioPlayer.paused) {
+        audioPlayer.play();
+        playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+      } else {
+        audioPlayer.pause();
+        playBtn.innerHTML = '<i class="fa fa-play"></i>';
+      }
+    };
+    
+    // 上一首
+    prevBtn.onclick = function() {
+      currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      loadSong(currentIndex);
+      audioPlayer.play();
+      playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+    };
+    
+    // 下一首
+    nextBtn.onclick = function() {
+      currentIndex = (currentIndex + 1) % playlist.length;
+      loadSong(currentIndex);
+      audioPlayer.play();
+      playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+    };
+    
+    // 加载歌曲
+    function loadSong(index) {
+      var song = playlist[index];
+      currentSong.textContent = song.title;
+      audioPlayer.src = song.src;
+    }
+    
+    // 自动播放下一首
+    audioPlayer.addEventListener('ended', function() {
+      currentIndex = (currentIndex + 1) % playlist.length;
+      loadSong(currentIndex);
+      audioPlayer.play();
+    });
+  };
+</script>
+</body>
+</html>
